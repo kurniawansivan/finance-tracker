@@ -94,4 +94,6 @@ class AccountProvider with ChangeNotifier {
     }
     return total;
   }
+
+  findAccountById(String s) {}
 }

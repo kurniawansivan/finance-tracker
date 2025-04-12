@@ -9,6 +9,7 @@ import 'package:finance_tracker/providers/transaction_provider.dart';
 import 'package:finance_tracker/providers/account_provider.dart';
 import 'package:finance_tracker/providers/category_provider.dart';
 import 'package:finance_tracker/providers/budget_provider.dart';
+import 'package:finance_tracker/screens/transaction_list_screen.dart'; // Add this import
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -258,6 +259,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           child: Text('No transactions available'),
                         ),
                       ),
+
+                    const SizedBox(height: 8),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const TransactionListScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text('View All Transactions'),
+                      ),
+                    ),
 
                     const SizedBox(height: 24),
                     const Text(
