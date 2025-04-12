@@ -224,37 +224,47 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    SegmentedButton<TransactionType>(
-                      selected: {_selectedType},
-                      onSelectionChanged: (Set<TransactionType> types) {
-                        setState(() {
-                          _selectedType = types.first;
-                          // Reset category when changing type
-                          _selectedCategoryId = null;
-                        });
-                      },
-                      segments: const [
-                        ButtonSegment<TransactionType>(
-                          value: TransactionType.expense,
-                          label: Text('Expense'),
-                          icon: Icon(Icons.arrow_upward),
+                    SizedBox(
+                      width: double.infinity,
+                      child: SegmentedButton<TransactionType>(
+                        selected: {_selectedType},
+                        onSelectionChanged: (Set<TransactionType> types) {
+                          setState(() {
+                            _selectedType = types.first;
+                            // Reset category when changing type
+                            _selectedCategoryId = null;
+                          });
+                        },
+                        segments: const [
+                          ButtonSegment<TransactionType>(
+                            value: TransactionType.expense,
+                            label:
+                                Text('Expense', style: TextStyle(fontSize: 12)),
+                            icon: Icon(Icons.arrow_upward, size: 16),
+                          ),
+                          ButtonSegment<TransactionType>(
+                            value: TransactionType.income,
+                            label:
+                                Text('Income', style: TextStyle(fontSize: 12)),
+                            icon: Icon(Icons.arrow_downward, size: 16),
+                          ),
+                          ButtonSegment<TransactionType>(
+                            value: TransactionType.transfer,
+                            label: Text('Transfer',
+                                style: TextStyle(fontSize: 12)),
+                            icon: Icon(Icons.swap_horiz, size: 16),
+                          ),
+                          ButtonSegment<TransactionType>(
+                            value: TransactionType.savings,
+                            label:
+                                Text('Savings', style: TextStyle(fontSize: 12)),
+                            icon: Icon(Icons.savings, size: 16),
+                          ),
+                        ],
+                        style: const ButtonStyle(
+                          visualDensity: VisualDensity.compact,
                         ),
-                        ButtonSegment<TransactionType>(
-                          value: TransactionType.income,
-                          label: Text('Income'),
-                          icon: Icon(Icons.arrow_downward),
-                        ),
-                        ButtonSegment<TransactionType>(
-                          value: TransactionType.transfer,
-                          label: Text('Transfer'),
-                          icon: Icon(Icons.swap_horiz),
-                        ),
-                        ButtonSegment<TransactionType>(
-                          value: TransactionType.savings,
-                          label: Text('Savings'),
-                          icon: Icon(Icons.savings),
-                        ),
-                      ],
+                      ),
                     ),
                     const SizedBox(height: 16),
 
@@ -333,7 +343,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     else
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 8),
-                        height: 80,
+                        height: 110, // Keep the increased height
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: availableCategories.length,
@@ -342,6 +352,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                             final isSelected =
                                 category.id == _selectedCategoryId;
 
+                            // Check if category name is longer than 10 characters
+                            final bool isLongName = category.name.length > 10;
+
                             return GestureDetector(
                               onTap: () {
                                 setState(() {
@@ -349,27 +362,44 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                                 });
                               },
                               child: Container(
-                                margin: const EdgeInsets.only(right: 16),
+                                margin: const EdgeInsets.only(
+                                    right:
+                                        10), // Reduced margin for tighter layout
+                                width: 70, // Fixed width for each category
                                 child: Column(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     CircleAvatar(
                                       backgroundColor: isSelected
                                           ? category.color
                                           : category.color.withOpacity(0.5),
-                                      radius: 24,
+                                      radius: 22, // Slightly smaller icons
                                       child: Icon(
                                         category.icon,
                                         color: Colors.white,
+                                        size: 20, // Smaller icon size
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      category.name,
-                                      style: TextStyle(
-                                        fontWeight: isSelected
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
+                                    const SizedBox(height: 6),
+                                    SizedBox(
+                                      height: 36, // Fixed height for text area
+                                      width: 68, // Slightly wider for text
+                                      child: Text(
+                                        category.name,
+                                        style: TextStyle(
+                                          fontSize: isLongName
+                                              ? 10
+                                              : 11, // Smaller font for longer names
+                                          fontWeight: isSelected
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                          letterSpacing: isLongName
+                                              ? -0.5
+                                              : 0, // Tighter letter spacing for longer names
+                                        ),
+                                        textAlign: TextAlign.center,
                                         overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
                                       ),
                                     ),
                                   ],
