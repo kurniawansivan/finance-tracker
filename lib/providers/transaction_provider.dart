@@ -15,8 +15,8 @@ class TransactionProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> loadTransactions() async {
+    // Don't notify at the start of loading
     _isLoading = true;
-    notifyListeners();
 
     if (_startDate != null && _endDate != null) {
       final dynamicList = await _databaseService.getTransactionsByDateRange(
@@ -28,7 +28,7 @@ class TransactionProvider with ChangeNotifier {
     }
 
     _isLoading = false;
-    notifyListeners();
+    notifyListeners(); // Only notify once at the end
   }
 
   Future<void> setDateRange(DateTime startDate, DateTime endDate) async {

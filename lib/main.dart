@@ -4,9 +4,11 @@ import 'package:finance_tracker/providers/transaction_provider.dart';
 import 'package:finance_tracker/providers/account_provider.dart';
 import 'package:finance_tracker/providers/category_provider.dart';
 import 'package:finance_tracker/providers/budget_provider.dart';
+import 'package:finance_tracker/providers/monthly_analysis_provider.dart';
 import 'package:finance_tracker/screens/dashboard_screen.dart';
 import 'package:finance_tracker/screens/accounts_screen.dart';
 import 'package:finance_tracker/screens/add_transaction_screen.dart';
+import 'package:finance_tracker/screens/monthly_analysis_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,6 +25,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AccountProvider()),
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => BudgetProvider()),
+        ChangeNotifierProvider(create: (_) => MonthlyAnalysisProvider()),
       ],
       child: MaterialApp(
         title: 'Finance Tracker',
@@ -67,6 +70,7 @@ class _HomePageState extends State<HomePage> {
         children: const [
           DashboardScreen(),
           AccountsScreen(),
+          MonthlyAnalysisScreen(),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -89,6 +93,10 @@ class _HomePageState extends State<HomePage> {
           NavigationDestination(
             icon: Icon(Icons.account_balance_wallet),
             label: 'Accounts',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.analytics),
+            label: 'Monthly',
           ),
         ],
       ),

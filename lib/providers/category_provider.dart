@@ -18,13 +18,13 @@ class CategoryProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> loadCategories() async {
+    // Don't notify at the start of loading
     _isLoading = true;
-    notifyListeners();
 
     _categories = await _databaseService.getCategories();
 
     _isLoading = false;
-    notifyListeners();
+    notifyListeners(); // Only notify once at the end
   }
 
   Future<void> addCategory(Category category) async {

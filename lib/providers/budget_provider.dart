@@ -12,13 +12,13 @@ class BudgetProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> loadBudgets() async {
+    // Don't notify at the start of loading
     _isLoading = true;
-    notifyListeners();
 
     _budgets = await _databaseService.getBudgets();
 
     _isLoading = false;
-    notifyListeners();
+    notifyListeners(); // Only notify once at the end
   }
 
   Future<void> addBudget(Budget budget) async {

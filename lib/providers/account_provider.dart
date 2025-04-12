@@ -12,13 +12,13 @@ class AccountProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> loadAccounts() async {
+    // Don't notify at the start of loading
     _isLoading = true;
-    notifyListeners();
 
     _accounts = await _databaseService.getAccounts();
 
     _isLoading = false;
-    notifyListeners();
+    notifyListeners(); // Only notify once at the end
   }
 
   Future<void> addAccount(Account account) async {
