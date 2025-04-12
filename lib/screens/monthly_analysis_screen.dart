@@ -39,33 +39,23 @@ class _MonthlyAnalysisScreenState extends State<MonthlyAnalysisScreen> {
               onRefresh: () async {
                 await provider.loadData();
               },
-              child: CustomScrollView(
+              child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: _buildMonthSelector(provider),
-                    ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildMonthSelector(provider),
+                      const SizedBox(height: 16),
+                      _buildFinancialSummary(provider),
+                      const SizedBox(height: 24),
+                      _buildCategoryBreakdown(provider, categoryProvider),
+                      const SizedBox(height: 24),
+                      _buildTransactionBreakdown(provider, categoryProvider),
+                    ],
                   ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: _buildFinancialSummary(provider),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child:
-                          _buildCategoryBreakdown(provider, categoryProvider),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child:
-                        _buildTransactionBreakdown(provider, categoryProvider),
-                  ),
-                ],
+                ),
               ),
             ),
     );
@@ -118,7 +108,7 @@ class _MonthlyAnalysisScreenState extends State<MonthlyAnalysisScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Padding(
-          padding: EdgeInsets.only(top: 16.0, bottom: 8.0),
+          padding: EdgeInsets.only(top: 16.0, bottom: 16.0),
           child: Text(
             'Financial Summary',
             style: TextStyle(
@@ -127,53 +117,57 @@ class _MonthlyAnalysisScreenState extends State<MonthlyAnalysisScreen> {
             ),
           ),
         ),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisSpacing: 16.0,
-          mainAxisSpacing: 16.0,
-          childAspectRatio: 1.5,
-          children: [
-            _buildSummaryCard(
-              title: 'Income',
-              amount: summary.totalIncome,
-              currency: currency,
-              icon: Icons.arrow_upward,
-              color: Colors.green,
-              growth: provider.getIncomeGrowth(),
-            ),
-            _buildSummaryCard(
-              title: 'Expenses',
-              amount: summary.totalExpenses,
-              currency: currency,
-              icon: Icons.arrow_downward,
-              color: Colors.red,
-              growth: provider.getExpenseGrowth(),
-            ),
-            _buildSummaryCard(
-              title: 'Savings',
-              amount: summary.totalSavings,
-              currency: currency,
-              icon: Icons.savings,
-              color: Colors.blue,
-              growth: provider.getSavingsGrowth(),
-            ),
-            _buildSummaryCard(
-              title: 'Balance',
-              amount: summary.balance,
-              currency: currency,
-              icon: Icons.account_balance_wallet,
-              color: Colors.purple,
-              showGrowth: false,
-            ),
-          ],
-        ),
+        LayoutBuilder(builder: (context, constraints) {
+          final cardWidth = (constraints.maxWidth - 16) / 2;
+          return Wrap(
+            spacing: 16.0,
+            runSpacing: 16.0,
+            children: [
+              _buildSummaryItem(
+                width: cardWidth,
+                title: 'Income',
+                amount: summary.totalIncome,
+                currency: currency,
+                icon: Icons.arrow_upward,
+                color: Colors.green,
+                growth: provider.getIncomeGrowth(),
+              ),
+              _buildSummaryItem(
+                width: cardWidth,
+                title: 'Expenses',
+                amount: summary.totalExpenses,
+                currency: currency,
+                icon: Icons.arrow_downward,
+                color: Colors.red,
+                growth: provider.getExpenseGrowth(),
+              ),
+              _buildSummaryItem(
+                width: cardWidth,
+                title: 'Savings',
+                amount: summary.totalSavings,
+                currency: currency,
+                icon: Icons.savings,
+                color: Colors.blue,
+                growth: provider.getSavingsGrowth(),
+              ),
+              _buildSummaryItem(
+                width: cardWidth,
+                title: 'Balance',
+                amount: summary.balance,
+                currency: currency,
+                icon: Icons.account_balance_wallet,
+                color: Colors.purple,
+                showGrowth: false,
+              ),
+            ],
+          );
+        }),
       ],
     );
   }
 
-  Widget _buildSummaryCard({
+  Widget _buildSummaryItem({
+    required double width,
     required String title,
     required double amount,
     required NumberFormat currency,
@@ -182,58 +176,66 @@ class _MonthlyAnalysisScreenState extends State<MonthlyAnalysisScreen> {
     double? growth,
     bool showGrowth = true,
   }) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: color, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              currency.format(amount),
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (showGrowth && growth != null && growth != 0) ...[
-              const SizedBox(height: 4),
+    return SizedBox(
+      width: width,
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
               Row(
                 children: [
-                  Icon(
-                    growth > 0 ? Icons.trending_up : Icons.trending_down,
-                    color: growth > 0 ? Colors.green : Colors.red,
-                    size: 14,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${growth.abs().toStringAsFixed(1)}%',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: growth > 0 ? Colors.green : Colors.red,
+                  Icon(icon, color: color, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
+              const SizedBox(height: 8),
+              Text(
+                currency.format(amount),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (showGrowth && growth != null && growth != 0) ...[
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      growth > 0 ? Icons.trending_up : Icons.trending_down,
+                      color: growth > 0 ? Colors.green : Colors.red,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${growth.abs().toStringAsFixed(1)}%',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: growth > 0 ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -274,28 +276,37 @@ class _MonthlyAnalysisScreenState extends State<MonthlyAnalysisScreen> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                AspectRatio(
-                  aspectRatio: 1.3,
-                  child: PieChart(
-                    PieChartData(
-                      sections: _buildPieSections(
-                        sortedExpenses,
-                        categoryPercentages,
-                        categoryProvider,
-                        summary.totalExpenses,
+            child: LayoutBuilder(builder: (context, constraints) {
+              final chartSize = constraints.maxWidth > 600
+                  ? 300.0
+                  : constraints.maxWidth * 0.6;
+
+              return Column(
+                children: [
+                  Center(
+                    child: SizedBox(
+                      height: chartSize,
+                      width: chartSize,
+                      child: PieChart(
+                        PieChartData(
+                          sections: _buildPieSections(
+                            sortedExpenses,
+                            categoryPercentages,
+                            categoryProvider,
+                            summary.totalExpenses,
+                          ),
+                          sectionsSpace: 2,
+                          centerSpaceRadius: chartSize * 0.15,
+                          startDegreeOffset: 180,
+                        ),
                       ),
-                      sectionsSpace: 2,
-                      centerSpaceRadius: 40,
-                      startDegreeOffset: 180,
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                _buildCategoryLegend(sortedExpenses, categoryProvider),
-              ],
-            ),
+                  const SizedBox(height: 16),
+                  _buildCategoryLegend(sortedExpenses, categoryProvider),
+                ],
+              );
+            }),
           ),
         ),
       ],
@@ -409,6 +420,7 @@ class _MonthlyAnalysisScreenState extends State<MonthlyAnalysisScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             width: 14,
@@ -424,13 +436,18 @@ class _MonthlyAnalysisScreenState extends State<MonthlyAnalysisScreen> {
               label,
               style: const TextStyle(fontSize: 14),
               overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
-          Text(
-            amount,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
+          const SizedBox(width: 8),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              amount,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
             ),
           ),
         ],
@@ -484,53 +501,45 @@ class _MonthlyAnalysisScreenState extends State<MonthlyAnalysisScreen> {
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            TabBar(
+            const TabBar(
+              labelColor: Colors.black,
               tabs: [
                 Tab(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.arrow_downward, color: Colors.red, size: 16),
-                      SizedBox(width: 8),
-                      Text('Expenses', style: TextStyle(color: Colors.red)),
-                    ],
-                  ),
+                  icon: Icon(Icons.arrow_downward, color: Colors.red),
+                  text: 'Expenses',
                 ),
                 Tab(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.arrow_upward, color: Colors.green, size: 16),
-                      SizedBox(width: 8),
-                      Text('Income', style: TextStyle(color: Colors.green)),
-                    ],
-                  ),
+                  icon: Icon(Icons.arrow_upward, color: Colors.green),
+                  text: 'Income',
                 ),
               ],
-              indicatorColor: Theme.of(context).primaryColor,
               indicatorWeight: 3,
-              indicatorSize: TabBarIndicatorSize.tab,
+              labelStyle: TextStyle(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 300,
+            LimitedBox(
+              maxHeight: 300,
               child: TabBarView(
                 children: [
                   // Expenses Tab
-                  _buildTransactionList(
-                    sortedExpenses,
-                    categoryProvider,
-                    summary.totalExpenses,
-                    Colors.red.shade50,
-                  ),
+                  sortedExpenses.isEmpty
+                      ? const Center(child: Text('No expense data available'))
+                      : _buildTransactionList(
+                          sortedExpenses,
+                          categoryProvider,
+                          summary.totalExpenses,
+                          Colors.red.shade50,
+                        ),
                   // Income Tab
-                  _buildTransactionList(
-                    sortedIncome,
-                    categoryProvider,
-                    summary.totalIncome,
-                    Colors.green.shade50,
-                  ),
+                  sortedIncome.isEmpty
+                      ? const Center(child: Text('No income data available'))
+                      : _buildTransactionList(
+                          sortedIncome,
+                          categoryProvider,
+                          summary.totalIncome,
+                          Colors.green.shade50,
+                        ),
                 ],
               ),
             ),
@@ -553,83 +562,78 @@ class _MonthlyAnalysisScreenState extends State<MonthlyAnalysisScreen> {
       return const Center(child: Text('No data available'));
     }
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: ListView.builder(
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          final entry = items[index];
-          final categoryId = entry.key;
-          final amount = entry.value;
-          final category = categoryProvider.getCategoryById(categoryId);
-          final percentage = (amount / total) * 100;
+    return ListView.builder(
+      padding: const EdgeInsets.all(8.0),
+      itemCount: items.length,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemBuilder: (context, index) {
+        final entry = items[index];
+        final categoryId = entry.key;
+        final amount = entry.value;
+        final category = categoryProvider.getCategoryById(categoryId);
+        final percentage = (amount / total) * 100;
 
-          return Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(8),
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          color: backgroundColor,
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: category?.color ?? Colors.grey,
+                  radius: 16,
+                  child: Icon(
+                    category?.icon ?? Icons.category,
+                    color: Colors.white,
+                    size: 14,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        category?.name ?? 'Unknown',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      LinearProgressIndicator(
+                        value: percentage / 100,
+                        backgroundColor: Colors.grey.shade200,
+                        minHeight: 6,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          category?.color ?? Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${percentage.toStringAsFixed(1)}%',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  currency.format(amount),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: category?.color ?? Colors.grey,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      category?.icon ?? Icons.category,
-                      color: Colors.white,
-                      size: 16,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          category?.name ?? 'Unknown',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        LinearProgressIndicator(
-                          value: percentage / 100,
-                          backgroundColor: Colors.grey.shade200,
-                          minHeight: 6,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            category?.color ?? Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${percentage.toStringAsFixed(1)}%',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    currency.format(amount),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
