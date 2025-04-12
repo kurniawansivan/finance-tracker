@@ -5,10 +5,12 @@ import 'package:finance_tracker/providers/account_provider.dart';
 import 'package:finance_tracker/providers/category_provider.dart';
 import 'package:finance_tracker/providers/budget_provider.dart';
 import 'package:finance_tracker/providers/monthly_analysis_provider.dart';
+import 'package:finance_tracker/providers/theme_provider.dart';
 import 'package:finance_tracker/screens/dashboard_screen.dart';
 import 'package:finance_tracker/screens/accounts_screen.dart';
 import 'package:finance_tracker/screens/add_transaction_screen.dart';
 import 'package:finance_tracker/screens/monthly_analysis_screen.dart';
+import 'package:finance_tracker/screens/export_reports_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -26,15 +28,19 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => BudgetProvider()),
         ChangeNotifierProvider(create: (_) => MonthlyAnalysisProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-      child: MaterialApp(
-        title: 'Finance Tracker',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-          useMaterial3: true,
-        ),
-        home: const HomePage(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'Finance Tracker',
+            debugShowCheckedModeBanner: false,
+            theme: themeProvider.getLightTheme(),
+            darkTheme: themeProvider.getDarkTheme(),
+            themeMode: themeProvider.themeMode,
+            home: const HomePage(),
+          );
+        },
       ),
     );
   }
@@ -60,6 +66,33 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Finance Tracker'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf),
+            tooltip: 'Export Reports',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const ExportReportsScreen()),
+              );
+            },
+          ),
+          IconButton(
+            icon: Icon(
+              Provider.of<ThemeProvider>(context).isDarkMode
+                  ? Icons.light_mode
+                  : Icons.dark_mode,
+            ),
+            tooltip: 'Toggle Theme',
+            onPressed: () {
+              Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+            },
+          ),
+        ],
+      ),
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) {
