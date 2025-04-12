@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.personalfinance.finance_tracker">
    <application
-        android:label="finance_tracker"
+        android:label="Finance Tracker by Kz"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
